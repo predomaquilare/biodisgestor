@@ -54,12 +54,13 @@ void loop() {
   brushless.write(0);
   if (millis() - last_send >= 1000) {
     last_send = millis();
-    message += "{";
+   
     for(byte i = 0; i < 8; i++) {
       message += " ";
-      message += "sensor" + String(i+1)+": " + String(sensors[i]);
+      message +=  String(sensors[i]);
+      message += " ";
     }
-    message += " }";
+  
     sendMessage(message);
     message = "\0";  
   }

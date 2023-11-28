@@ -23,10 +23,11 @@ unsigned long last_send = 0;
 byte msgCount = 0;
 int sensors[8];
 String incoming;
-String fatiador;
+
 
 void onReceive(int packetSize);
 void onReceive(int packetSize);
+void extrairValoresParaVetor(const char *string, int *vetor, int tamanhoMaximo);
 
 void setup() {
   Serial.begin(115200);
@@ -45,25 +46,17 @@ void setup() {
 
 
 
-void loop(void) {
+void loop() {
   //u8g2.clearBuffer();
-  
+  incoming = "123 456 789";
   if (millis() - last_send >= 0) {
     last_send = millis();
     onReceive(LoRa.parsePacket());
 
-    for(byte i = 1; i < strlen(incoming.c_str()); i++) {
-      fatiador =+ char(incoming[i]);
-      Serial.println(fatiador);
-      delay(1);
-      if(fatiador == " sensor1: ") {
-        Serial.println("ass");
-        fatiador = "\0";
-      }
-    }
-
-    
-
+    extrairValoresParaVetor(incoming, sensors, 8);
+    Serial.println(sensors[0]);
+    Serial.println(sensors[1]);
+    Serial.println(sensors[2]);
 
 
     //String mensagem = " Ola mundo! :O ";
@@ -114,4 +107,19 @@ void onReceive(int packetSize)
   {
     incoming += (char)LoRa.read();
   }
+}
+
+void extrairValoresParaVetor(const char *string, int *vetor, int tamanhoMaximo) {
+    int i = 0;
+    int valor;
+    while (sscanf(string, "%d", &valor) == 1 && i < tamanhoMaximo) {
+        vetor[i] = valor;
+        while (*string != ' ' && *string != '\0') {
+            string++;
+        }
+        while (*string == ' ') {
+            string++;
+        }
+        i++;
+    }
 }
