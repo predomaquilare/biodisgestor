@@ -69,7 +69,7 @@ void setup() {
 
 void loop() {
   //u8g2.clearBuffer();
-  
+  upFirebase();
   if (millis() - last_send >= 1000) {
     last_send = millis();
     onReceive(LoRa.parsePacket());
@@ -141,7 +141,7 @@ void upFirebase() {
   byte i = 0;
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis >= 5000))  {
     sendDataPrevMillis = millis();
-      while(i < 4) {
+      while(i < 8) {
         if(millis() - prev >= 500) {
           prev = millis();
           Firebase.RTDB.set(&fbdo, ("/biodigestor/Sensor" + String(i+1)) , sensors[i]);
