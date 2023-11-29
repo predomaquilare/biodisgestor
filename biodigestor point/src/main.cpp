@@ -19,6 +19,9 @@
 #define local       0xFF
 #define destination 0xBB
 
+#define MINSPEED 50
+#define MAXSPEED 180
+
 Servo brushless;
 Adafruit_ADS1115 MUX1;
 Adafruit_ADS1115 MUX2;
@@ -26,19 +29,21 @@ Adafruit_ADS1115 MUX2;
 void readSensors(bool o = 0);
 void onReceive(int packetSize); 
 void sendMessage(String outgoing); 
+void setbrushless();
 
 int sensors[8] = {};
+int ant = 0;
 unsigned long last_send = 0;
 byte msgCount = 0;
-String message;
-//testet
+String message = "";
+String incoming = "";
+
 
 void setup() {
   SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
   Wire.begin(SDA_OLED, SCL_OLED);
   Serial.begin(115200);
-  
-  brushless.attach(32);
+  setbrushless();
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   MUX1.begin(0x48);
   MUX2.begin(0x49);
@@ -47,11 +52,13 @@ void setup() {
   {             
     while (1);                      
   }
+  
 }
 
 void loop() {
   readSensors();
-  brushless.write(0);
+  
+
   if (millis() - last_send >= 1000) {
     last_send = millis();
    
@@ -63,9 +70,18 @@ void loop() {
   
     sendMessage(message);
     message = "\0";  
+    
   }
-  
+  /*
   onReceive(LoRa.parsePacket());
+  if(incoming == "MOTOR ACTIVE") {
+    brushless.write(MAXSPEED);
+  } else {
+    brushless.write(MINSPEED);
+  }
+  Serial.println(incoming);
+  */
+  
 }
 
 void readSensors(bool o) {
@@ -95,16 +111,22 @@ void sendMessage(String outgoing)
 
 void onReceive(int packetSize) 
 {
+  
   if (packetSize == 0) return;          // Se nenhuma mesnagem foi recebida, retorna nada
   int recipient = LoRa.read();          // Endereco de quem ta recebendo
   byte sender = LoRa.read();            // Endereco do remetente
   byte incomingMsgId = LoRa.read();     // Mensagem
   byte incomingLength = LoRa.read();    // Tamanho da mensagem
  
-  String incoming = "";
+  
  
   while (LoRa.available())
   {
     incoming += (char)LoRa.read();
   }
+}
+
+void setbrushless() {
+  brushless.attach(13);
+  brushless.write(MINSPEED);
 }

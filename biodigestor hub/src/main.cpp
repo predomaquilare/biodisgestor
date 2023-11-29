@@ -24,10 +24,11 @@ byte msgCount = 0;
 int sensors[8];
 
 String incoming;
+String mensagem;
 char incomingcopy[150] = {"teste"};
 
 void onReceive(int packetSize);
-void onReceive(int packetSize);
+void sendMessage(String outgoing);
 void StringToInt(int *i, char *s);
 
 void setup() {
@@ -50,20 +51,17 @@ void setup() {
 void loop() {
   //u8g2.clearBuffer();
   
-  if (millis() - last_send >= 0) {
+  if (millis() - last_send >= 1000) {
     last_send = millis();
     onReceive(LoRa.parsePacket());
     strcpy(incomingcopy, incoming.c_str()); 
     if(incoming != "\n") {
       StringToInt(sensors, incomingcopy); 
     }
-
-    //String mensagem = " Ola mundo! :O ";
-    //sendMessage(mensagem);
   }
- 
-
   
+    //mensagem = "MOTOR ACTIVE";
+    //sendMessage(mensagem);
 
 
   u8g2.setFont(u8g2_font_5x8_tr);
@@ -71,7 +69,7 @@ void loop() {
 
   u8g2.clearBuffer();
   for(byte i = 1; i <= 8; i++) {
-    u8g2.drawStr( (128/2)-(5*2.5) ,6*i,String(sensors[i-1]).c_str());
+    u8g2.drawStr( (128/2)-(4*2.5) ,8 *i, String(sensors[i-1]).c_str());
   }
   u8g2.sendBuffer();
     
