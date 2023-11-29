@@ -24,7 +24,7 @@
 #define SCK_LORA    5
 #define CS_LORA     18
 #define DI0_LORA    26
-
+//:p
 #define local       0xBB
 #define destination 0xFF
 
