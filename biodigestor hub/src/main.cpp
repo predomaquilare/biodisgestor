@@ -22,12 +22,13 @@ U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 15, 4, 16);
 unsigned long last_send = 0;
 byte msgCount = 0;
 int sensors[8];
+
 String incoming;
-
+char incomingcopy[150] = {"teste"};
 
 void onReceive(int packetSize);
 void onReceive(int packetSize);
-void extrairValoresParaVetor(const char *string, int *vetor, int tamanhoMaximo);
+void StringToInt(int *i, char *s);
 
 void setup() {
   Serial.begin(115200);
@@ -48,16 +49,14 @@ void setup() {
 
 void loop() {
   //u8g2.clearBuffer();
-  incoming = "123 456 789";
+  
   if (millis() - last_send >= 0) {
     last_send = millis();
     onReceive(LoRa.parsePacket());
-
-    extrairValoresParaVetor(incoming, sensors, 8);
-    Serial.println(sensors[0]);
-    Serial.println(sensors[1]);
-    Serial.println(sensors[2]);
-
+    strcpy(incomingcopy, incoming.c_str()); 
+    if(incoming != "\n") {
+      StringToInt(sensors, incomingcopy); 
+    }
 
     //String mensagem = " Ola mundo! :O ";
     //sendMessage(mensagem);
@@ -67,18 +66,18 @@ void loop() {
   
 
 
-  u8g2.setFont(u8g2_font_4x6_tr);
+  u8g2.setFont(u8g2_font_5x8_tr);
   
 
   u8g2.clearBuffer();
   for(byte i = 1; i <= 8; i++) {
-    u8g2.drawStr( (128/2)-(4*2.5) ,6*i,"teste");
+    u8g2.drawStr( (128/2)-(5*2.5) ,6*i,String(sensors[i-1]).c_str());
   }
   u8g2.sendBuffer();
     
   
   //u8g2.sendBuffer();
-  incoming = "\0";
+  incoming = '\0';
 }
 
 
@@ -109,17 +108,13 @@ void onReceive(int packetSize)
   }
 }
 
-void extrairValoresParaVetor(const char *string, int *vetor, int tamanhoMaximo) {
-    int i = 0;
-    int valor;
-    while (sscanf(string, "%d", &valor) == 1 && i < tamanhoMaximo) {
-        vetor[i] = valor;
-        while (*string != ' ' && *string != '\0') {
-            string++;
-        }
-        while (*string == ' ') {
-            string++;
-        }
-        i++;
-    }
+void StringToInt(int *i, char *s) {
+  char * token = strtok(s, " ");
+  byte o = 0;
+
+  while( token != NULL) {
+    i[o] = atoi(token);
+    token = strtok(NULL, " ");
+    o++;
+  }
 }
