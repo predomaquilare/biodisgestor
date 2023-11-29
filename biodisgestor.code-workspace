@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "biodigestor hub",
+			"path": "biodigestor hub"
+		},
+		{
+			"name": "biodigestor point",
+			"path": "biodigestor point"
+		}
+	],
+	"settings": {}
+}
