@@ -69,11 +69,7 @@ void onReceive(int packetSize)
   byte sender = LoRa.read();           
   byte incomingMsgId = LoRa.read();     
   byte incomingLength = LoRa.read();    
-
-  while (LoRa.available())
-  {
-    incoming += (char)LoRa.read();
-  }
+  while (LoRa.available())  incoming += (char)LoRa.read();
 }
 void StringToInt(int *i, char *s) {
   char * token = strtok(s, " ");
