@@ -14,6 +14,7 @@
 #include <addons/RTDBHelper.h>
 #include <addons/TokenHelper.h>
 #include <NTPClient.h>
+#include <WiFiUdp.h>
 
 #define WIFI_SSID "IFPB"
 #define EAP_USERNAME "20201750008" 
@@ -29,5 +30,7 @@
 #define DI0_LORA    26
 #define local       0xBB
 #define destination 0xFF
+#define UpdateTime  0
+
 
 #endif

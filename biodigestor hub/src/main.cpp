@@ -1,15 +1,21 @@
 #include "macros.h"
 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", -3*3600, 60000);
+
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 15, 4, 16);
+
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
 unsigned long sendDataPrevMillis = 0;
+
 byte msgCount = 0;
 int sensors[8];
 
 bool signupOK = false;
+bool once = 1;
 
 String incoming;
 String mensagem;
@@ -21,22 +27,20 @@ void StringToInt(int *i, char *s);
 void upFirebase();
 void initialconection();
 void showSensors();
+void initialtiming();
+void timeUpdate();
 
 void setup() {
   Serial.begin(115200);
   SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   u8g2.begin();
-  
   if(!LoRa.begin(915E6)) while (1);                      
-
   initialconection();
 }
 
-
-
-
 void loop() {
+  timeClient.update();
   onReceive(LoRa.parsePacket());
   strcpy(incomingcopy, incoming.c_str()); 
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
@@ -45,7 +49,9 @@ void loop() {
   incoming = '\0';
 }
 
-
+void initialtiming() {
+  timeClient.begin();
+}
 void sendMessage(String outgoing) 
 {
   LoRa.beginPacket();                   // Inicia o pacote da mensagem
@@ -83,7 +89,7 @@ void StringToInt(int *i, char *s) {
 void upFirebase() {
   uint8_t prev = 0;
   byte i = 0;
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis >= 10000))  {
+  if (Firebase.ready() && signupOK && (timeClient.getMinutes() == UpdateTime) && (timeClient.getSeconds() == 0) && once == 1)  {
     sendDataPrevMillis = millis();
       while(i < 8) {
         if(millis() - prev >= 254) {
@@ -92,7 +98,9 @@ void upFirebase() {
           i++;
         }
       }
+      once = 0;
   }
+  if(timeClient.getMinutes() == UpdateTime && timeClient.getSeconds() == 1) once = 1;
 }
 void initialconection() {
   WiFi.begin(WIFI_SSID, WPA2_AUTH_PEAP, EAP_USERNAME, EAP_USERNAME, EAP_PASSWORD);
