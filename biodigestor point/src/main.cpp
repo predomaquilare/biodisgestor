@@ -29,14 +29,16 @@ void setup() {
 
 void loop() {
   readSensors();
+  onReceive(LoRa.parsePacket());
+  Serial.println(incoming);
   for(byte i = 0; i < 8; i++) {
     message += " ";
     message +=  String(sensors[i]);
     message += " ";
   }
   sendMessage(message);
-  message = "\0";  
-  onReceive(LoRa.parsePacket());
+  
+  
   
   /*
   if(incoming == "MOTOR ACTIVE") {
@@ -46,6 +48,8 @@ void loop() {
   }
   Serial.println(incoming);
   */
+  message = "\0";  
+  incoming = "\0";
 }
 
 void readSensors(bool o) {
@@ -60,24 +64,25 @@ void readSensors(bool o) {
   }
 }
 void sendMessage(String outgoing) {
-  LoRa.beginPacket();               
-  LoRa.write(destination);           
-  LoRa.write(local);            
-  LoRa.write(msgCount);             
-  LoRa.write(outgoing.length());     
-  LoRa.print(outgoing);                
-  LoRa.endPacket();                   
-  msgCount++;                      
+  LoRa.beginPacket();                   
+  LoRa.write(destination);              
+  LoRa.write(local);             
+  LoRa.write(msgCount);                 
+  LoRa.write(outgoing.length());        
+  LoRa.print(outgoing);                 
+  LoRa.endPacket();                     
+  msgCount++;                           
 }
 void onReceive(int packetSize) {
-  if (packetSize == 0) return;         
-  int recipient = LoRa.read();         
-  byte sender = LoRa.read();          
-  byte incomingMsgId = LoRa.read();  
-  byte incomingLength = LoRa.read(); 
+  if (packetSize == 0) return;
+  int recipient = LoRa.read();        
+  byte sender = LoRa.read();           
+  byte incomingMsgId = LoRa.read();     
+  byte incomingLength = LoRa.read();    
   while (LoRa.available())  incoming += (char)LoRa.read();
 }
 void setbrushless() {
   brushless.attach(13);
   brushless.write(MINSPEED);
 }
+

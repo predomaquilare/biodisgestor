@@ -17,8 +17,8 @@ int sensors[8];
 bool signupOK = false;
 bool once = 1;
 
-String incoming;
-String mensagem;
+String incoming = "";
+String message = "";
 char incomingcopy[150] = {""};
 
 void onReceive(int packetSize);
@@ -28,6 +28,7 @@ void upFirebase();
 void initialconection();
 void showSensors();
 void initialtiming();
+void checkMotor();
 
 void setup() {
   Serial.begin(115200);
@@ -45,7 +46,9 @@ void loop() {
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
   showSensors();
   upFirebase();
-  incoming = '\0';
+  checkMotor();
+  message = "\0";
+  incoming = "\0";
 }
 
 void initialtiming() {
@@ -134,4 +137,13 @@ void showSensors() {
   }
   u8g2.sendBuffer();
   incoming = '\0';
+}
+void checkMotor() {
+  if(Firebase.RTDB.getBool(&fbdo, "/biodigestor/Motor")) {
+    if(fbdo.dataType() == "boolean") {
+      message += String(fbdo.boolData());
+      sendMessage(message);
+      
+    }
+  }
 }
