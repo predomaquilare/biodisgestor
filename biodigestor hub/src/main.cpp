@@ -5,7 +5,6 @@ FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
-unsigned long last_send = 0;
 unsigned long sendDataPrevMillis = 0;
 byte msgCount = 0;
 int sensors[8];
@@ -21,6 +20,7 @@ void sendMessage(String outgoing);
 void StringToInt(int *i, char *s);
 void upFirebase();
 void initialconection();
+void showSensors();
 
 void setup() {
   Serial.begin(115200);
@@ -28,45 +28,20 @@ void setup() {
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   u8g2.begin();
   
-  if(!LoRa.begin(915E6)) 
-  {             
-    while (1);                      
-  }
+  if(!LoRa.begin(915E6)) while (1);                      
+
   initialconection();
 }
 
-//strlen(sensors[i])/2
 
 
 
 void loop() {
-  //u8g2.clearBuffer();
+  onReceive(LoRa.parsePacket());
+  strcpy(incomingcopy, incoming.c_str()); 
+  if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
+  showSensors();
   upFirebase();
-  if (millis() - last_send >= 10000) {
-    last_send = millis();
-    onReceive(LoRa.parsePacket());
-    Serial.println(incoming);
-    strcpy(incomingcopy, incoming.c_str()); 
-    if(incoming != "\n") {
-      StringToInt(sensors, incomingcopy); 
-    }
-  }
-  
-    //mensagem = "MOTOR ACTIVE";
-    //sendMessage(mensagem);
-
-
-  u8g2.setFont(u8g2_font_5x8_tr);
-  
-
-  u8g2.clearBuffer();
-  for(byte i = 1; i <= 8; i++) {
-    u8g2.drawStr( (128/2)-(4*2.5) ,8 *i, String(sensors[i-1]).c_str());
-  }
-  u8g2.sendBuffer();
-    
-  
-  //u8g2.sendBuffer();
   incoming = '\0';
 }
 
@@ -82,8 +57,6 @@ void sendMessage(String outgoing)
   LoRa.endPacket();                     
   msgCount++;                           
 }
- 
-
 void onReceive(int packetSize) 
 {
   if (packetSize == 0) return;
@@ -97,7 +70,6 @@ void onReceive(int packetSize)
     incoming += (char)LoRa.read();
   }
 }
-
 void StringToInt(int *i, char *s) {
   char * token = strtok(s, " ");
   byte o = 0;
@@ -108,14 +80,13 @@ void StringToInt(int *i, char *s) {
     o++;
   }
 }
-
 void upFirebase() {
-  unsigned long prev = 0;
+  uint8_t prev = 0;
   byte i = 0;
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis >= 10000))  {
     sendDataPrevMillis = millis();
       while(i < 8) {
-        if(millis() - prev >= 500) {
+        if(millis() - prev >= 254) {
           prev = millis();
           Firebase.RTDB.set(&fbdo, ("/biodigestor/Sensor" + String(i+1)) , sensors[i]);
           i++;
@@ -123,7 +94,6 @@ void upFirebase() {
       }
   }
 }
-
 void initialconection() {
   WiFi.begin(WIFI_SSID, WPA2_AUTH_PEAP, EAP_USERNAME, EAP_USERNAME, EAP_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
@@ -152,4 +122,13 @@ void initialconection() {
   Firebase.reconnectNetwork(true);
   Firebase.begin(&config, &auth);
   Firebase.setDoubleDigits(5);
+}
+void showSensors() {
+  u8g2.setFont(u8g2_font_5x8_tr);
+  u8g2.clearBuffer();
+  for(byte i = 1; i <= 8; i++) {
+    u8g2.drawStr( (128/2)-(4*2.5) ,8 *i, String(sensors[i-1]).c_str());
+  }
+  u8g2.sendBuffer();
+  incoming = '\0';
 }

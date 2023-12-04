@@ -37,7 +37,7 @@ void loop() {
   readSensors();
   
 
-  if (millis() - last_send >= 10000) {
+  if (millis() - last_send >= 0) {
     last_send = millis();
    
     for(byte i = 0; i < 8; i++) {

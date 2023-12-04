@@ -13,6 +13,7 @@
 #include <Firebase_ESP_Client.h>
 #include <addons/RTDBHelper.h>
 #include <addons/TokenHelper.h>
+#include <NTPClient.h>
 
 #define WIFI_SSID "IFPB"
 #define EAP_USERNAME "20201750008" 
