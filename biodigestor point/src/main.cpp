@@ -1,26 +1,4 @@
-#include <Arduino.h>
-#include <ESP32Servo.h>
-#include <Wire.h>
-#include <Adafruit_ADS1X15.h>
-#include <SPI.h>
-#include <LoRa.h>
-
-#define MISO_LORA   19
-#define MOSI_LORA   27
-#define RST_LORA    14
-#define SCK_LORA    5
-#define CS_LORA     18
-#define DI0_LORA    26
-
-#define SCL_OLED    15
-#define SDA_OLED    4
-#define RST_OLED    16
-
-#define local       0xFF
-#define destination 0xBB
-
-#define MINSPEED 50
-#define MAXSPEED 180
+#include "macros.h"
 
 Servo brushless;
 Adafruit_ADS1115 MUX1;
@@ -96,36 +74,28 @@ void readSensors(bool o) {
   }
 }
 
-void sendMessage(String outgoing) 
-{
-  LoRa.beginPacket();                   // Inicia o pacote da mensagem
-  LoRa.write(destination);              // Adiciona o endereco de destino
-  LoRa.write(local);             // Adiciona o endereco do remetente
-  LoRa.write(msgCount);                 // Contador da mensagem
-  LoRa.write(outgoing.length());        // Tamanho da mensagem em bytes
-  LoRa.print(outgoing);                 // Vetor da mensagem 
-  LoRa.endPacket();                     // Finaliza o pacote e envia
-  msgCount++;                           // Contador do numero de mensagnes enviadas
+void sendMessage(String outgoing) {
+  LoRa.beginPacket();               
+  LoRa.write(destination);           
+  LoRa.write(local);            
+  LoRa.write(msgCount);             
+  LoRa.write(outgoing.length());     
+  LoRa.print(outgoing);                
+  LoRa.endPacket();                   
+  msgCount++;                      
 }
- 
+void onReceive(int packetSize) {
+  if (packetSize == 0) return;         
+  int recipient = LoRa.read();         
+  byte sender = LoRa.read();          
+  byte incomingMsgId = LoRa.read();  
+  byte incomingLength = LoRa.read(); 
 
-void onReceive(int packetSize) 
-{
-  
-  if (packetSize == 0) return;          // Se nenhuma mesnagem foi recebida, retorna nada
-  int recipient = LoRa.read();          // Endereco de quem ta recebendo
-  byte sender = LoRa.read();            // Endereco do remetente
-  byte incomingMsgId = LoRa.read();     // Mensagem
-  byte incomingLength = LoRa.read();    // Tamanho da mensagem
- 
-  
- 
   while (LoRa.available())
   {
     incoming += (char)LoRa.read();
   }
 }
-
 void setbrushless() {
   brushless.attach(13);
   brushless.write(MINSPEED);

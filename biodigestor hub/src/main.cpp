@@ -1,32 +1,4 @@
-#include <Arduino.h>
-#include <U8g2lib.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <LoRa.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <WiFi.h>
-#include <Firebase_ESP_Client.h>
-
-#include <addons/RTDBHelper.h>
-#include <addons/TokenHelper.h>
-
-#define WIFI_SSID "IFPB"
-#define EAP_USERNAME "20201750008" 
-#define EAP_PASSWORD "P3dr0_Gu3rr4" 
-#define DATABASE_URL "https://biodigestor-lora-default-rtdb.firebaseio.com/"
-#define API_KEY "AIzaSyAOzDmANFl73QsQ3GoFNLTFhs02e_bthd0 "
-
-#define MISO_LORA   19
-#define MOSI_LORA   27
-#define RST_LORA    14
-#define SCK_LORA    5
-#define CS_LORA     18
-#define DI0_LORA    26
-//:p
-#define local       0xBB
-#define destination 0xFF
+#include "macros.h"
 
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, 15, 4, 16);
 FirebaseData fbdo;
