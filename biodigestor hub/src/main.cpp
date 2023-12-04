@@ -14,7 +14,7 @@ bool signupOK = false;
 
 String incoming;
 String mensagem;
-char incomingcopy[150] = {"teste"};
+char incomingcopy[150] = {""};
 
 void onReceive(int packetSize);
 void sendMessage(String outgoing);
@@ -42,9 +42,10 @@ void setup() {
 void loop() {
   //u8g2.clearBuffer();
   upFirebase();
-  if (millis() - last_send >= 1000) {
+  if (millis() - last_send >= 10000) {
     last_send = millis();
     onReceive(LoRa.parsePacket());
+    Serial.println(incoming);
     strcpy(incomingcopy, incoming.c_str()); 
     if(incoming != "\n") {
       StringToInt(sensors, incomingcopy); 
@@ -111,7 +112,7 @@ void StringToInt(int *i, char *s) {
 void upFirebase() {
   unsigned long prev = 0;
   byte i = 0;
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis >= 5000))  {
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis >= 10000))  {
     sendDataPrevMillis = millis();
       while(i < 8) {
         if(millis() - prev >= 500) {
