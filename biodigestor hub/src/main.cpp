@@ -28,7 +28,6 @@ void upFirebase();
 void initialconection();
 void showSensors();
 void initialtiming();
-void timeUpdate();
 
 void setup() {
   Serial.begin(115200);
