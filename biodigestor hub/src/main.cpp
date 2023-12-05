@@ -46,26 +46,7 @@ void loop() {
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
   showSensors();
   upFirebase();
-  //checkMotor();
-  
-          /*
-    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()),0); 
-    for (byte o = 0; o < 8; o++)
-    {
-      
-      Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours())+"/Sensor" + String(o+1)) , sensors[o]);  
-    }
-    delay(5000);
-
-                                                                         
-    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1),0); 
-    for (byte o = 0; o < 8; o++)
-    {
-      Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(i+1)) , sensors[i]);  
-    }
-    delay(5000);
-    */
-    
+  checkMotor();
   
   message = "\0";
   incoming = "\0";
@@ -156,11 +137,10 @@ void showSensors() {
   incoming = '\0';
 }
 void checkMotor() {
-  if(Firebase.RTDB.getBool(&fbdo, "/biodigestor/Motor")) {
+  if(Firebase.RTDB.getBool(&fbdo, "/Motor")) {
     if(fbdo.dataType() == "boolean") {
       message += String(fbdo.boolData());
       sendMessage(message);
-      
     }
   }
 }
