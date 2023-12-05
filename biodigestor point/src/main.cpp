@@ -8,13 +8,17 @@ void readSensors(bool o = 0);
 void onReceive(int packetSize); 
 void sendMessage(String outgoing); 
 void setbrushless();
+void treatincoming();
+void createMessage();
+void brushlesscontrol();
 
 int sensors[8] = {};
 int ant = 0;
-unsigned long last_send = 0;
 byte msgCount = 0;
 String message = "";
 String incoming = "";
+bool incomingstate = 0;
+bool lastincomingstate = 0;
 
 void setup() {
   SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
@@ -24,34 +28,50 @@ void setup() {
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   MUX1.begin(0x48);
   MUX2.begin(0x49);
-  if(!LoRa.begin(915E6))  while (1);                      
+  if(!LoRa.begin(915E6))  while (1);             
 }
 
 void loop() {
+
   readSensors();
+  createMessage();
+  //sendMessage(message);
+  
   onReceive(LoRa.parsePacket());
   Serial.println(incoming);
+  treatincoming();
+  brushlesscontrol();
+  message = "\0";  
+  incoming = "\0";
+}
+
+void brushlesscontrol() {
+  digitalWrite(25, incomingstate); 
+  if(incomingstate == 1) {
+    brushless.write(MAXSPEED);
+  } else {
+    brushless.write(MINSPEED);
+  }
+}
+void createMessage() {
   for(byte i = 0; i < 8; i++) {
     message += " ";
     message +=  String(sensors[i]);
     message += " ";
   }
-  sendMessage(message);
-  
-  
-  
-  /*
-  if(incoming == "MOTOR ACTIVE") {
-    brushless.write(MAXSPEED);
-  } else {
-    brushless.write(MINSPEED);
-  }
-  Serial.println(incoming);
-  */
-  message = "\0";  
-  incoming = "\0";
 }
-
+void treatincoming() {
+  if(incoming == "1") {
+    incomingstate = 1;
+  }
+  else if(incoming == "0") {
+    incomingstate = 0;
+  }
+  else {
+    incomingstate = lastincomingstate;
+  }
+  lastincomingstate = incomingstate;
+}
 void readSensors(bool o) {
   for(byte i = 0; i < 8; i++) { 
     if(i < 4) {
