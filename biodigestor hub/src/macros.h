@@ -30,7 +30,7 @@
 #define DI0_LORA    26
 #define local       0xBB
 #define destination 0xFF
-#define UpdateTime  13
+#define UpdateTime  0
 
 
 #endif
