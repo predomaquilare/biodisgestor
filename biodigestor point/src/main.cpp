@@ -28,17 +28,16 @@ void setup() {
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   MUX1.begin(0x48);
   MUX2.begin(0x49);
-  if(!LoRa.begin(915E6))  while (1);             
+  if(!LoRa.begin(915E6))  while (1);    
+  pinMode(25, OUTPUT);         
 }
 
 void loop() {
-
   readSensors();
   createMessage();
   //sendMessage(message);
   
   onReceive(LoRa.parsePacket());
-  Serial.println(incoming);
   treatincoming();
   brushlesscontrol();
   message = "\0";  
