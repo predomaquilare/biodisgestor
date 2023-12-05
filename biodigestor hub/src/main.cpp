@@ -9,7 +9,7 @@ FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
-unsigned long sendDataPrevMillis = 0;
+
 
 byte msgCount = 0;
 int sensors[8];
@@ -54,19 +54,17 @@ void loop() {
 void initialtiming() {
   timeClient.begin();
 }
-void sendMessage(String outgoing) 
-{
-  LoRa.beginPacket();                   // Inicia o pacote da mensagem
-  LoRa.write(destination);              // Adiciona o endereco de destino
-  LoRa.write(local);             // Adiciona o endereco do remetente
-  LoRa.write(msgCount);                 // Contador da mensagem
-  LoRa.write(outgoing.length());        // Tamanho da mensagem em bytes
-  LoRa.print(outgoing);                 // Vetor da mensagem 
+void sendMessage(String outgoing) {
+  LoRa.beginPacket();                
+  LoRa.write(destination);          
+  LoRa.write(local);         
+  LoRa.write(msgCount);              
+  LoRa.write(outgoing.length());      
+  LoRa.print(outgoing);                
   LoRa.endPacket();                     
   msgCount++;                           
 }
-void onReceive(int packetSize) 
-{
+void onReceive(int packetSize) {
   if (packetSize == 0) return;
   int recipient = LoRa.read();        
   byte sender = LoRa.read();           
@@ -88,11 +86,12 @@ void upFirebase() {
   uint8_t prev = 0;
   byte i = 0;
   if (Firebase.ready() && signupOK && (timeClient.getMinutes() == UpdateTime) && (timeClient.getSeconds() == 0) && once == 1)  {
-    sendDataPrevMillis = millis();
+    Firebase.RTDB.set(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
+    Firebase.RTDB.set(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1),0);                                          
       while(i < 8) {
         if(millis() - prev >= 254) {
           prev = millis();
-          Firebase.RTDB.set(&fbdo, ("/biodigestor/Sensor" + String(i+1)) , sensors[i]);
+          Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(i+1)) , sensors[i]);   
           i++;
         }
       }
