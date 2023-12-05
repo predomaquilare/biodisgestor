@@ -45,8 +45,31 @@ void loop() {
   strcpy(incomingcopy, incoming.c_str()); 
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
   showSensors();
-  upFirebase();
-  checkMotor();
+  //upFirebase();
+  //checkMotor();
+  
+    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
+    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()),0); 
+    for (byte o = 0; o < 8; o++)
+    {
+      
+      Firebase.RTDB.setAsync(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours())+"/Sensor" + String(o+1)) , sensors[o]);  
+    }
+    delay(5000);
+
+    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
+    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1),0); 
+    for (byte o = 0; o < 8; o++)
+    {
+      Firebase.RTDB.setAsync(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(o+1)) , sensors[o]);  
+    }
+    delay(5000);
+    
+    
+    
+  
+  while(1){}
+  
   message = "\0";
   incoming = "\0";
 }
@@ -75,7 +98,6 @@ void onReceive(int packetSize) {
 void StringToInt(int *i, char *s) {
   char * token = strtok(s, " ");
   byte o = 0;
-
   while( token != NULL) {
     i[o] = atoi(token);
     token = strtok(NULL, " ");
