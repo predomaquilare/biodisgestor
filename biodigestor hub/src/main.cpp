@@ -45,30 +45,27 @@ void loop() {
   strcpy(incomingcopy, incoming.c_str()); 
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
   showSensors();
-  //upFirebase();
+  upFirebase();
   //checkMotor();
   
-    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
+          /*
     Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()),0); 
     for (byte o = 0; o < 8; o++)
     {
       
-      Firebase.RTDB.setAsync(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours())+"/Sensor" + String(o+1)) , sensors[o]);  
+      Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours())+"/Sensor" + String(o+1)) , sensors[o]);  
     }
     delay(5000);
 
-    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
+                                                                         
     Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1),0); 
     for (byte o = 0; o < 8; o++)
     {
-      Firebase.RTDB.setAsync(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(o+1)) , sensors[o]);  
+      Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(i+1)) , sensors[i]);  
     }
     delay(5000);
+    */
     
-    
-    
-  
-  while(1){}
   
   message = "\0";
   incoming = "\0";
@@ -108,18 +105,17 @@ void upFirebase() {
   uint8_t prev = 0;
   byte i = 0;
   if (Firebase.ready() && signupOK && (timeClient.getMinutes() == UpdateTime) && (timeClient.getSeconds() == 0) && once == 1)  {
-    Firebase.RTDB.set(&fbdo, "/"+String(timeClient.getDay()+3),0);                                                                          
-    Firebase.RTDB.set(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1),0);                                          
+    Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()),0);                                  
       while(i < 8) {
         if(millis() - prev >= 254) {
           prev = millis();
-          Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()+1)+"/Sensor" + String(i+1)) , sensors[i]);   
+          Firebase.RTDB.set(&fbdo, ("/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours())+"/Sensor" + String(i+1)) , sensors[i]);   
           i++;
         }
       }
       once = 0;
   }
-  if(timeClient.getMinutes() == UpdateTime && timeClient.getSeconds() == 1) once = 1;
+  if(timeClient.getMinutes() == UpdateTime && timeClient.getSeconds() > 1) once = 1;
 }
 void initialconection() {
   WiFi.begin(WIFI_SSID, WPA2_AUTH_PEAP, EAP_USERNAME, EAP_USERNAME, EAP_PASSWORD);
