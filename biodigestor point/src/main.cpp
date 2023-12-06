@@ -17,30 +17,36 @@ int ant = 0;
 byte msgCount = 0;
 String message = "";
 String incoming = "";
+bool alternating = 0;
 bool incomingstate = 0;
 bool lastincomingstate = 0;
+unsigned long timer = 0;
 
 void setup() {
-  SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
-  Wire.begin(SDA_OLED, SCL_OLED);
   Serial.begin(115200);
-  setbrushless();
+  pinMode(25, OUTPUT);   
+  SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
+  Wire.begin(SDA_OLED, SCL_OLED);
   MUX1.begin(0x48);
   MUX2.begin(0x49);
+  setbrushless();
   if(!LoRa.begin(915E6))  while (1);    
-  pinMode(25, OUTPUT);         
 }
 
 void loop() {
   readSensors();
-  createMessage();
-  //sendMessage(message);
-  
+  if(millis() - timer >= 200) {
+    createMessage();
+    sendMessage(message);
+    timer = millis();
+    Serial.println(message);
+    message = "\0";
+  }
+
   onReceive(LoRa.parsePacket());
   treatincoming();
-  brushlesscontrol();
-  message = "\0";  
+  brushlesscontrol(); 
   incoming = "\0";
 }
 
@@ -93,12 +99,12 @@ void sendMessage(String outgoing) {
   msgCount++;                           
 }
 void onReceive(int packetSize) {
-  if (packetSize == 0) return;
-  int recipient = LoRa.read();        
-  byte sender = LoRa.read();           
-  byte incomingMsgId = LoRa.read();     
-  byte incomingLength = LoRa.read();    
-  while (LoRa.available())  incoming += (char)LoRa.read();
+    int recipient = LoRa.read();        
+    byte sender = LoRa.read();           
+    byte incomingMsgId = LoRa.read();     
+    byte incomingLength = LoRa.read();    
+    while (LoRa.available())  incoming += (char)LoRa.read();
+  
 }
 void setbrushless() {
   brushless.attach(13);

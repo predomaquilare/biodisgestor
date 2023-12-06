@@ -9,16 +9,15 @@ FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
-
-
 byte msgCount = 0;
 int sensors[8];
-
+int timer = 0;
 bool signupOK = false;
 bool once = 1;
 
 String incoming = "";
 String message = "";
+bool alternating = 0;
 char incomingcopy[150] = {""};
 
 void onReceive(int packetSize);
@@ -35,20 +34,26 @@ void setup() {
   SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
   LoRa.setPins(CS_LORA, RST_LORA, DI0_LORA);
   u8g2.begin();
-  if(!LoRa.begin(915E6)) while (1);                      
+  if(!LoRa.begin(915E6)) while (1);  
   initialconection();
 }
 
 void loop() {
   timeClient.update();
+  
+  if(millis() - timer >= 200) {
+    checkMotor();
+    sendMessage(message);
+    timer = millis();
+    message = "\0";
+  }
+
   onReceive(LoRa.parsePacket());
+
   strcpy(incomingcopy, incoming.c_str()); 
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
-  showSensors();
   upFirebase();
-  checkMotor();
-  
-  message = "\0";
+  showSensors();
   incoming = "\0";
 }
 
@@ -115,6 +120,7 @@ void initialconection() {
   config.database_url = DATABASE_URL;
   config.tcp_data_sending_retry = 1;
   config.timeout.socketConnection = 5000;
+  
   if (Firebase.signUp(&config, &auth, "", "")) {
     Serial.println("Ok");
     signupOK = true;
@@ -140,7 +146,7 @@ void checkMotor() {
   if(Firebase.RTDB.getBool(&fbdo, "/Motor")) {
     if(fbdo.dataType() == "boolean") {
       message += String(fbdo.boolData());
-      sendMessage(message);
+      
     }
   }
 }
