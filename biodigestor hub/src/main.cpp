@@ -29,6 +29,7 @@ void showSensors();
 void initialtiming();
 void checkMotor();
 
+
 void setup() {
   Serial.begin(115200);
   SPI.begin(SCK_LORA, MISO_LORA, MOSI_LORA,CS_LORA);
@@ -49,7 +50,7 @@ void loop() {
   }
 
   onReceive(LoRa.parsePacket());
-
+  incoming = incoming.substring(1);
   strcpy(incomingcopy, incoming.c_str()); 
   if(incoming != "\n")  StringToInt(sensors, incomingcopy); 
   upFirebase();
