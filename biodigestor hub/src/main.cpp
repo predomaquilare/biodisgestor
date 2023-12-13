@@ -11,14 +11,14 @@ FirebaseConfig config;
 
 byte msgCount = 0;
 int sensors[8];
-int timer = 0;
+byte timer = 0;
 bool signupOK = false;
 bool once = 1;
 
 String incoming = "";
 String message = "";
 bool alternating = 0;
-char incomingcopy[150] = {""};
+char incomingcopy[130] = {""};
 
 void onReceive(int packetSize);
 void sendMessage(String outgoing);
@@ -41,7 +41,7 @@ void setup() {
 void loop() {
   timeClient.update();
   
-  if(millis() - timer >= 200) {
+  if(millis() - timer >= 250) {
     checkMotor();
     sendMessage(message);
     timer = millis();
@@ -88,7 +88,7 @@ void StringToInt(int *i, char *s) {
   }
 }
 void upFirebase() {
-  uint8_t prev = 0;
+  byte prev = 0;
   byte i = 0;
   if (Firebase.ready() && signupOK && (timeClient.getMinutes() == UpdateTime) && (timeClient.getSeconds() == 0) && once == 1)  {
     Firebase.RTDB.pushAsync(&fbdo, "/"+String(timeClient.getDay()+3)+"/"+String(timeClient.getHours()),0);                                  

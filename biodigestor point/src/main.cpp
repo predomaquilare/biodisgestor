@@ -36,7 +36,7 @@ void setup() {
 
 void loop() {
   readSensors();
-  if(millis() - timer >= 200) {
+  if(millis() - timer >= 250) {
     createMessage();
     sendMessage(message);
     timer = millis();

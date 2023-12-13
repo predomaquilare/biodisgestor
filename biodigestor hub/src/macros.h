@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <WiFi.h>
-#include <ArduinoJson.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/RTDBHelper.h>
 #include <addons/TokenHelper.h>
