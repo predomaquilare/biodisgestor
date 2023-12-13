@@ -1,5 +1,5 @@
 #include "macros.h"
-
+//
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", -3*3600, 60000);
 
